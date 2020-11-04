@@ -16,6 +16,13 @@ class ClientTests: XCTestCase {
         client.communicator = communicator
     }
 
+    func test_payloadId() {
+        let payloadId = Request.payloadId()
+        // Must be smaller than JS's max int https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER
+        XCTAssertTrue(payloadId <= 9007199254740991)
+        XCTAssertTrue(payloadId >= 0)
+    }
+    
     func test_sendRequest_whenSessionNotFound_thenThrows() {
         XCTAssertThrowsError(try client.send(Request.testRequest, completion: nil), "sessionNotFound") { error in
             XCTAssertEqual(error as? Client.ClientError, .sessionNotFound)

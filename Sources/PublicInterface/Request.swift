@@ -30,13 +30,21 @@ public class Request {
         self.payload = payload
         self.url = url
     }
-
-    public convenience init(url: WCURL, method: Method, id: RequestID? = UUID().uuidString) {
+    
+    public static func payloadId() -> Int {
+        let now = Int(NSDate().timeIntervalSince1970) * 1000
+        let datePart: Int = now * Int(pow(Double(10),Double(3)))
+        let extraPart: Int = Int(floor(Double.random(in: 0...1) * Double(pow(Double(10),Double(3)))))
+        let payloadId: Int = datePart + extraPart
+        return payloadId
+    }
+    
+    public convenience init(url: WCURL, method: Method, id: RequestID? = Request.payloadId()) {
         let payload = JSONRPC_2_0.Request(method: method, params: nil, id: JSONRPC_2_0.IDType(id))
         self.init(payload: payload, url: url)
     }
 
-    public convenience init<T: Encodable>(url: WCURL, method: Method, params: [T], id: RequestID? = UUID().uuidString) throws {
+    public convenience init<T: Encodable>(url: WCURL, method: Method, params: [T], id: RequestID? = Request.payloadId()) throws {
         let data = try JSONEncoder.encoder().encode(params)
         let values = try JSONDecoder().decode([JSONRPC_2_0.ValueType].self, from: data)
         let parameters = JSONRPC_2_0.Request.Params.positional(values)
@@ -44,7 +52,7 @@ public class Request {
         self.init(payload: payload, url: url)
     }
 
-    public convenience init<T: Encodable>(url: WCURL, method: Method, namedParams params: T, id: RequestID? = UUID().uuidString) throws {
+    public convenience init<T: Encodable>(url: WCURL, method: Method, namedParams params: T, id: RequestID? = Request.payloadId()) throws {
         let data = try JSONEncoder.encoder().encode(params)
         let values = try JSONDecoder().decode([String: JSONRPC_2_0.ValueType].self, from: data)
         let parameters = JSONRPC_2_0.Request.Params.named(values)
